@@ -41,7 +41,7 @@ void ChatServer::onMessage(const TcpConnectionPtr &conn, Buffer *buffer, Timesta
 
     // 完全解耦网络模块以及业务模块代码
     // 通过单例模式（懒汉）得到调用函数得到对应的handler
-    auto msgHandler = ChatService::instance()->getMsgHandler(js["msgid"].get<int>());
+    auto msgHandler = ChatService::instance()->getHandler(js["msgid"].get<int>());
     // 回调消息绑定好的事件处理器，执行相应业务
     msgHandler(conn, js, timestamp);
 }
