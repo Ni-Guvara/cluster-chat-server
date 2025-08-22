@@ -19,6 +19,9 @@ class ChatService
 public:
     static ChatService *instance();
 
+    // 获取消息对应的处理器
+    MsgHandler getHandler(int msgId);
+
     // 处理登陆业务
     void login(const TcpConnectionPtr &conn, json &js, Timestamp time);
 
@@ -28,6 +31,7 @@ public:
 private:
     ChatService();
     ~ChatService();
+
     unordered_map<int, MsgHandler> _msgHandlerMap;
 };
 

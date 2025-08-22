@@ -7,7 +7,7 @@
 
 enum EmMsgType
 {
-    LOGIN_MSG,
+    LOGIN_MSG = 1,
     REG_MSG
 };
 #endif
