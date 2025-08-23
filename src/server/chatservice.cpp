@@ -68,9 +68,20 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
             {
                 json response;
                 response["msgid"] = LOGIN_MSG_ACK;
-                response["errno"] = 0;
                 response["id"] = user.getId();
                 response["name"] = user.getName();
+                response["errno"] = 0;
+
+                // 查询当前用户是否有离线消息
+                vector<string> msgs = _offlineMsgModel.query(id);
+
+                if (!msgs.empty())
+                {
+                    response["offlinemsg"] = msgs;
+                    // 读取完所有离线消息将消息删除
+                    _offlineMsgModel.remove(id);
+                }
+
                 conn->send(response.dump());
             }
         }
@@ -123,6 +134,7 @@ void ChatService::reg(const TcpConnectionPtr &conn, json &js, Timestamp time)
 void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time)
 {
     int toId = js["to"];
+    string msg = js["msg"];
 
     {
         lock_guard<mutex> lck(_connMtx);
@@ -136,6 +148,7 @@ void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time
     }
 
     // 存储离线消息
+    _offlineMsgModel.insert(toId, msg);
 }
 
 /*
