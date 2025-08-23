@@ -67,3 +67,20 @@ User UserModel::query(int id)
 
     return User();
 }
+
+void UserModel::resetStatus()
+{
+
+    // 组装更新sql
+    char sql[1024] = {0};
+    sprintf(sql, "update User set status = 'offline' where status = 'online'");
+
+    MySQL mysql;
+    if (mysql.connect())
+    {
+        if (mysql.update(sql))
+        {
+            return;
+        }
+    }
+}

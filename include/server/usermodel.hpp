@@ -9,6 +9,7 @@ public:
     bool insert(User &user);
     User query(int id);
     bool updateStatus(User &user);
+    void resetStatus();
 };
 
 #endif

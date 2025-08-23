@@ -37,6 +37,9 @@ public:
     // 处理客户端异常退出
     void closeClientException(const TcpConnectionPtr &conn);
 
+    // 服务器异常，重置方法
+    void reset();
+
 private:
     ChatService();
     ~ChatService();

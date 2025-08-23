@@ -181,3 +181,9 @@ void ChatService::closeClientException(const TcpConnectionPtr &conn)
         _userModel.updateStatus(user);
     }
 }
+
+void ChatService::reset()
+{
+    // 登录的客户端登陆状态online--->offline
+    _userModel.resetStatus();
+}
