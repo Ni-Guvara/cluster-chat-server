@@ -7,5 +7,7 @@ class UserModel
 {
 public:
     bool insert(User &user);
+    User query(int id);
+    bool updateStatus(User &user);
 };
 #endif
