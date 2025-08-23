@@ -38,6 +38,7 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
     int id = js["id"];
     string password = js["password"];
     User user = _userModel.query(id);
+
     if (user.getId() == id && user.getPassWord() == password)
     {
         if (user.getStatus() == "online")
@@ -50,6 +51,16 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
         }
         else
         {
+            /*
+             * 某用户发送信息的时候，服务器需要向其他用户推送信息，因此需要保存每个登录用户的连接
+             */
+            // 加锁, _userConnMap添加连接的时候保证线程安全
+            {
+                lock_guard<mutex> lck(_connMtx);
+                // 登录成功，记录用户登录连接
+                _userConnMap.insert({user.getId(), conn});
+            }
+
             // 登录成功, 更新用户状态信息
             user.setStatus("online");
             _userModel.updateStatus(user);
@@ -102,5 +113,36 @@ void ChatService::reg(const TcpConnectionPtr &conn, json &js, Timestamp time)
         response["msgid"] = REG_MSG_ACK;
         response["errno"] = 1;
         conn->send(response.dump());
+    }
+}
+
+/*
+    客户端会异常退出
+
+    1、删除_userConnMap中的连接
+    2、将客户的状态从online--->offline
+*/
+void ChatService::closeClientException(const TcpConnectionPtr &conn)
+{
+    User user;
+    {
+        lock_guard<mutex> lck(_connMtx);
+
+        for (auto it = _userConnMap.begin(); it != _userConnMap.end(); it++)
+        {
+            if (it->second == conn)
+            {
+                user.setId(it->first);
+                _userConnMap.erase(it);
+                break;
+            }
+        }
+    }
+
+    // 更新用户状态信息
+    if (user.getId() != -1)
+    {
+        user.setStatus("offline");
+        _userModel.updateStatus(user);
     }
 }

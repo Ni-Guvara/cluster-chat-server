@@ -4,6 +4,7 @@
 #include <muduo/net/TcpConnection.h>
 #include <unordered_map>
 #include <functional>
+#include <mutex>
 
 #include "json/json.hpp"
 #include "usermodel.hpp"
@@ -29,12 +30,17 @@ public:
     // 处理注册业务
     void reg(const TcpConnectionPtr &conn, json &js, Timestamp time);
 
+    // 处理客户端异常退出
+    void closeClientException(const TcpConnectionPtr &conn);
+
 private:
     ChatService();
     ~ChatService();
 
+    unordered_map<int, TcpConnectionPtr> _userConnMap;
     unordered_map<int, MsgHandler> _msgHandlerMap;
 
+    mutex _connMtx;
     // 数据操作类
     UserModel _userModel;
 };

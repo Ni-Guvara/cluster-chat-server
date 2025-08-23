@@ -27,6 +27,8 @@ void ChatServer::onConnection(const TcpConnectionPtr &conn)
 {
     if (!conn->connected())
     {
+        // 客户端异常退出：在业务层删除掉相关连接
+        ChatService::instance()->closeClientException(conn);
         conn->shutdown();
     }
 }
