@@ -30,6 +30,9 @@ public:
     // 处理注册业务
     void reg(const TcpConnectionPtr &conn, json &js, Timestamp time);
 
+    // one to one message
+    void oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time);
+
     // 处理客户端异常退出
     void closeClientException(const TcpConnectionPtr &conn);
 

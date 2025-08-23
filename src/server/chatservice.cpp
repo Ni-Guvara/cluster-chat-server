@@ -9,6 +9,7 @@ ChatService::ChatService()
 {
     _msgHandlerMap.insert({LOGIN_MSG, std::bind(&ChatService::login, this, _1, _2, _3)});
     _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::reg, this, _1, _2, _3)});
+    _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, _1, _2, _3)});
 }
 ChatService::~ChatService() {}
 
@@ -114,6 +115,27 @@ void ChatService::reg(const TcpConnectionPtr &conn, json &js, Timestamp time)
         response["errno"] = 1;
         conn->send(response.dump());
     }
+}
+
+/*
+    点对点聊天
+*/
+void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time)
+{
+    int toId = js["to"];
+
+    {
+        lock_guard<mutex> lck(_connMtx);
+        auto it = _userConnMap.find(toId);
+        if (it != _userConnMap.end()) // toId在线
+        {
+            // 转发消息
+            it->second->send(js.dump());
+            return;
+        }
+    }
+
+    // 存储离线消息
 }
 
 /*

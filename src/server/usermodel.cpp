@@ -6,6 +6,7 @@ bool UserModel::insert(User &user)
     // 组装sql
     char sql[1024] = {0};
     sprintf(sql, "insert into User(name, password, status) values ('%s', '%s', '%s')", user.getName().c_str(), user.getPassWord().c_str(), user.getStatus().c_str());
+
     MySQL mysql;
     if (mysql.connect())
     {
@@ -19,11 +20,29 @@ bool UserModel::insert(User &user)
     return false;
 }
 
+bool UserModel::updateStatus(User &user)
+{
+    // 组装更新sql
+    char sql[1024] = {0};
+    sprintf(sql, "update User set status = '%s' where id = %d", user.getStatus().c_str(), user.getId());
+
+    MySQL mysql;
+    if (mysql.connect())
+    {
+        if (mysql.update(sql))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 User UserModel::query(int id)
 {
     // 组装查询sql
     char sql[1024] = {0};
     sprintf(sql, "select * from User where id = %d", id);
+
     MySQL mysql;
     if (mysql.connect())
     {
@@ -47,21 +66,4 @@ User UserModel::query(int id)
     }
 
     return User();
-}
-
-bool UserModel::updateStatus(User &user)
-{
-    // 组装更新sql
-    char sql[1024] = {0};
-    sprintf(sql, "update User set status = '%s' where id = %d", user.getStatus().c_str(), user.getId());
-
-    MySQL mysql;
-    if (mysql.connect())
-    {
-        if (mysql.update(sql))
-        {
-            return true;
-        }
-    }
-    return false;
 }

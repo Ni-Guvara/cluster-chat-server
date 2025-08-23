@@ -10,4 +10,5 @@ public:
     User query(int id);
     bool updateStatus(User &user);
 };
+
 #endif
