@@ -6,6 +6,7 @@
 #include <functional>
 
 #include "json/json.hpp"
+#include "usermodel.hpp"
 
 using namespace std;
 using namespace muduo;
@@ -33,6 +34,9 @@ private:
     ~ChatService();
 
     unordered_map<int, MsgHandler> _msgHandlerMap;
+
+    // 数据操作类
+    UserModel _userModel;
 };
 
 #endif
