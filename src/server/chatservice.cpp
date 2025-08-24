@@ -10,7 +10,9 @@ ChatService::ChatService()
     _msgHandlerMap.insert({LOGIN_MSG, std::bind(&ChatService::login, this, _1, _2, _3)});
     _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::reg, this, _1, _2, _3)});
     _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, _1, _2, _3)});
+    _msgHandlerMap.insert({ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, _1, _2, _3)});
 }
+
 ChatService::~ChatService() {}
 
 ChatService *ChatService::instance()
@@ -82,6 +84,23 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
                     _offlineMsgModel.remove(id);
                 }
 
+                // 查询用户好友信息
+                vector<User> friends = _friendModel.query(id);
+                if (!friends.empty())
+                {
+                    vector<string> vec;
+                    for (User &u : friends)
+                    {
+                        json js;
+                        js["id"] = u.getId();
+                        js["name"] = u.getName();
+                        js["status"] = u.getStatus();
+                        vec.push_back(js.dump());
+                    }
+
+                    response["friends"] = vec;
+                }
+
                 conn->send(response.dump());
             }
         }
@@ -126,6 +145,18 @@ void ChatService::reg(const TcpConnectionPtr &conn, json &js, Timestamp time)
         response["errno"] = 1;
         conn->send(response.dump());
     }
+}
+
+/*
+    添加好友业务
+    msgid id friendid
+*/
+void ChatService::addFriend(const TcpConnectionPtr &conn, json &js, Timestamp time)
+{
+    int id = js["id"].get<int>();
+    int friendid = js["friendid"].get<int>();
+    // 存储好友信息
+    _friendModel.insert(id, friendid);
 }
 
 /*

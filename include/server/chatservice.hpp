@@ -9,6 +9,7 @@
 #include "json/json.hpp"
 #include "usermodel.hpp"
 #include "OfflineMessageModel.hpp"
+#include "FriendModel.hpp"
 
 using namespace std;
 using namespace muduo;
@@ -34,6 +35,9 @@ public:
     // one to one message
     void oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time);
 
+    // 添加好友业务
+    void addFriend(const TcpConnectionPtr &conn, json &js, Timestamp time);
+
     // 处理客户端异常退出
     void closeClientException(const TcpConnectionPtr &conn);
 
@@ -48,9 +52,11 @@ private:
     unordered_map<int, MsgHandler> _msgHandlerMap;
 
     mutex _connMtx;
+
     // 数据操作类
     UserModel _userModel;
     OfflineMessageModel _offlineMsgModel;
+    FriendModel _friendModel;
 };
 
 #endif
