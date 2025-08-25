@@ -46,7 +46,7 @@ vector<Group> GroupModel::queryGroup(int userid)
     // 查询用户所在群组
     // 组装更新sql
     char sql[1024] = {0};
-    sprintf(sql, "select a.id, a.groupname, a.groupdesc from AllGroup a inner join GroupUser b on a.id = b.groupid where a.id = %d", userid);
+    sprintf(sql, "select a.id, a.groupname, a.groupdesc from AllGroup a inner join GroupUser b on a.id = b.groupid where b.userid = %d", userid);
 
     MySQL mysql;
     vector<Group> groups;
