@@ -86,6 +86,7 @@ void mainMenu(int clientfd);
 
 // 注册的响应业务
 void doRegResponse(json &responsejs);
+
 // 登录的响应业务
 void doLoginResponse(json &responsejs);
 
@@ -311,7 +312,14 @@ void readTaskHandler(int clientfd)
 
         if (ONE_CHAT_MSG == msgtype)
         {
-            cout << js["time"].get<string>() << " [" << js["id"] << "] " << js["name"].get<string>() << "said: " << js["msg"].get<string>() << endl;
+            cout << js["time"].get<string>() << " [" << js["id"] << "] " << js["name"].get<string>() << " said: " << js["msg"].get<string>() << endl;
+            continue;
+        }
+
+        if (GROUP_CHAT_MSG == msgtype)
+        {
+            cout << "群消息[" << js["groupid"] << "]:" << js["time"].get<string>() << " [" << js["userid"] << "]" << js["name"].get<string>()
+                 << " said: " << js["msg"].get<string>() << endl;
             continue;
         }
 
@@ -358,6 +366,7 @@ void addfriend(int clientfd, string str)
         cerr << "send addfriend msg error -> " << buffer << endl;
     }
 }
+
 // "chat" command handler
 void chat(int clientfd, string str)
 {
@@ -401,7 +410,7 @@ void creategroup(int clientfd, string str)
 
     json js;
     js["msgid"] = CREATE_GROUP_MSG;
-    js["id"] = g_currentUser.getId();
+    js["userid"] = g_currentUser.getId();
     js["groupname"] = groupname;
     js["groupdesc"] = groupdesc;
     string buffer = js.dump();
@@ -418,7 +427,7 @@ void addgroup(int clientfd, string str)
     int groupid = atoi(str.c_str());
     json js;
     js["msgid"] = ADD_GROUP_MSG;
-    js["id"] = g_currentUser.getId();
+    js["userid"] = g_currentUser.getId();
     js["groupid"] = groupid;
     string buffer = js.dump();
 
@@ -443,7 +452,7 @@ void groupchat(int clientfd, string str)
 
     json js;
     js["msgid"] = GROUP_CHAT_MSG;
-    js["id"] = g_currentUser.getId();
+    js["userid"] = g_currentUser.getId();
     js["name"] = g_currentUser.getName();
     js["groupid"] = groupid;
     js["msg"] = message;

@@ -14,6 +14,7 @@ ChatService::ChatService()
     _msgHandlerMap.insert({CREATE_GROUP_MSG, std::bind(&ChatService::createGroup, this, _1, _2, _3)});
     _msgHandlerMap.insert({ADD_GROUP_MSG, std::bind(&ChatService::addGroup, this, _1, _2, _3)});
     _msgHandlerMap.insert({GROUP_CHAT_MSG, std::bind(&ChatService::groupChat, this, _1, _2, _3)});
+    _msgHandlerMap.insert({LOGINOUT_MSG, std::bind(&ChatService::loginout, this, _1, _2, _3)});
 }
 
 ChatService::~ChatService() {}
@@ -199,7 +200,8 @@ void ChatService::addFriend(const TcpConnectionPtr &conn, json &js, Timestamp ti
 */
 void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time)
 {
-    int toId = js["to"];
+    // int toId = js["to"];
+    int toId = js["toid"];
     string msg = js["msg"];
 
     {
@@ -258,7 +260,16 @@ void ChatService::groupChat(const TcpConnectionPtr &conn, json &js, Timestamp ti
         }
     }
 }
+// 退出登录，将数据表中数据状态更新为下线
+void ChatService::loginout(const TcpConnectionPtr &conn, json &js, Timestamp time)
+{
+    int id = js["id"];
+    User user;
+    user.setId(id);
+    user.setStatus("offline");
 
+    _userModel.updateStatus(user);
+}
 /*
     客户端会异常退出
 

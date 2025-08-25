@@ -48,6 +48,9 @@ public:
     // 群聊
     void groupChat(const TcpConnectionPtr &conn, json &js, Timestamp time);
 
+    // 登陆退出
+    void loginout(const TcpConnectionPtr &conn, json &js, Timestamp time);
+
     // 处理客户端异常退出
     void closeClientException(const TcpConnectionPtr &conn);
 
