@@ -9,6 +9,7 @@
 enum EmMsgType
 {
     LOGIN_MSG = 1,
+    LOGINOUT_MSG,
     LOGIN_MSG_ACK,
     REG_MSG,
     REG_MSG_ACK,
@@ -16,6 +17,7 @@ enum EmMsgType
     ADD_FRIEND_MSG,   // 添加好友消息
     CREATE_GROUP_MSG, // 创建群聊
     ADD_GROUP_MSG,    // 加入群聊
-    GROUP_CHAT_MSG
+    GROUP_CHAT_MSG,
+
 };
 #endif

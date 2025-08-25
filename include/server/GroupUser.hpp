@@ -5,9 +5,15 @@
 class GroupUser : public User
 {
 public:
-    void setRole(string role);
+       void setRole(string role)
+    {
+        this->role = role;
+    }
 
-    string getRole();
+    string getRole()
+    {
+        return role;
+    }
 
 private:
     string role;

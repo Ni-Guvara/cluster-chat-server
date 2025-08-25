@@ -7,8 +7,8 @@ using namespace placeholders;
 // 注册消息以及对应回调操作
 ChatService::ChatService()
 {
-    _msgHandlerMap.insert({LOGIN_MSG, std::bind(&ChatService::login, this, _1, _2, _3)});
     _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::reg, this, _1, _2, _3)});
+    _msgHandlerMap.insert({LOGIN_MSG, std::bind(&ChatService::login, this, _1, _2, _3)});
     _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, _1, _2, _3)});
     _msgHandlerMap.insert({ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, _1, _2, _3)});
     _msgHandlerMap.insert({CREATE_GROUP_MSG, std::bind(&ChatService::createGroup, this, _1, _2, _3)});
@@ -104,6 +104,38 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
                     response["friends"] = vec;
                 }
 
+                // 群组信息
+                vector<Group> groups = _groupModel.queryGroup(id);
+                if (!groups.empty())
+                {
+                    vector<string> vec;
+                    for (auto group : groups)
+                    {
+                        json js;
+                        js["id"] = group.getId();
+                        js["groupname"] = group.getName();
+                        js["groupdesc"] = group.getDesc();
+
+                        vector<GroupUser> groupUsers = group.getGroupUsers();
+                        vector<string> vec2;
+
+                        for (auto user : groupUsers)
+                        {
+                            json groupUsersJs;
+                            groupUsersJs["id"] = user.getId();
+                            groupUsersJs["name"] = user.getName();
+                            groupUsersJs["status"] = user.getStatus();
+                            groupUsersJs["role"] = user.getRole();
+                            vec2.push_back(groupUsersJs.dump());
+                        }
+                        js["groupusers"] = vec2;
+
+                        vec.push_back(js.dump());
+                    }
+
+                    response["groups"] = vec;
+                }
+
                 conn->send(response.dump());
             }
         }
@@ -187,8 +219,6 @@ void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time
 
 void ChatService::createGroup(const TcpConnectionPtr &conn, json &js, Timestamp time)
 {
-    LOG_INFO << js.dump();
-
     int userid = js["userid"].get<int>();
     Group g(-1, js["groupname"], js["groupdesc"]);
 
