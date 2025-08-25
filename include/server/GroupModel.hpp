@@ -10,10 +10,10 @@ class GroupModel
 {
 public:
     // 创建组
-    void create(int groupid);
+    bool create(Group &group);
 
     // 添加组员
-    void addGroupUser(int groupid, int userid, string role);
+    bool addGroup(int userid, int groupid, string role);
 
     // 获查询用户所在群组信息
     vector<Group> queryGroup(int userid);

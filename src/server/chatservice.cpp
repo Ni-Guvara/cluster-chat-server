@@ -11,6 +11,9 @@ ChatService::ChatService()
     _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::reg, this, _1, _2, _3)});
     _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, _1, _2, _3)});
     _msgHandlerMap.insert({ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, _1, _2, _3)});
+    _msgHandlerMap.insert({CREATE_GROUP_MSG, std::bind(&ChatService::createGroup, this, _1, _2, _3)});
+    _msgHandlerMap.insert({ADD_GROUP_MSG, std::bind(&ChatService::addGroup, this, _1, _2, _3)});
+    _msgHandlerMap.insert({GROUP_CHAT_MSG, std::bind(&ChatService::groupChat, this, _1, _2, _3)});
 }
 
 ChatService::~ChatService() {}
@@ -180,6 +183,50 @@ void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time
 
     // 存储离线消息
     _offlineMsgModel.insert(toId, msg);
+}
+
+void ChatService::createGroup(const TcpConnectionPtr &conn, json &js, Timestamp time)
+{
+    LOG_INFO << js.dump();
+
+    int userid = js["userid"].get<int>();
+    Group g(-1, js["groupname"], js["groupdesc"]);
+
+    if (_groupModel.create(g))
+    {
+        // 添加创建人信息
+        _groupModel.addGroup(userid, g.getId(), "creator");
+    }
+}
+
+// 加入群聊
+void ChatService::addGroup(const TcpConnectionPtr &conn, json &js, Timestamp time)
+{
+    _groupModel.addGroup(js["userid"].get<int>(), js["groupid"].get<int>(), "normal");
+}
+
+// 群聊
+void ChatService::groupChat(const TcpConnectionPtr &conn, json &js, Timestamp time)
+{
+    int userid = js["userid"];
+    int groupid = js["groupid"];
+    vector<int> userVec = _groupModel.queryGroupUsers(userid, groupid);
+
+    for (int id : userVec)
+    {
+        lock_guard<mutex> mtx(_connMtx);
+        auto it = _userConnMap.find(id);
+
+        if (it != _userConnMap.end()) // 如果在线,进行转发
+        {
+            it->second->send(js.dump());
+        }
+        else // 如果离线，进行离线消息存储
+        {
+            string msg = js.dump();
+            _offlineMsgModel.insert(id, msg);
+        }
+    }
 }
 
 /*

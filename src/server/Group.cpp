@@ -1,6 +1,6 @@
 #include "Group.hpp"
 
-Group::Group(int id = -1, string name = "", string desc = "")
+Group::Group(int id, string name, string desc)
 {
     this->id = id;
     this->name = name;
